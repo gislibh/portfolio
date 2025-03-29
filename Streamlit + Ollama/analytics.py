@@ -265,14 +265,12 @@ def render_costs_by_category(transactions):
         st.info("No cost data available (all amounts are positive).")
         return
     
-    # Group by category and sum costs (taking absolute values)
     cost_by_category = cost_df.groupby('category', as_index=False)['amount'].sum()
     cost_by_category['total_cost'] = cost_by_category['amount'].abs()
     
     st.subheader("Costs Grouped by Category")
     
     plt.figure(figsize=(10, 6))
-    # Use hue='category' so that palette can be mapped correctly, then remove the legend.
     ax = sns.barplot(
         data=cost_by_category, 
         x='category', 
