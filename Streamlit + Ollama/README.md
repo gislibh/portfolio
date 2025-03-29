@@ -25,8 +25,8 @@ Streamlit + Ollama is a local, privacy-focused tool for ingesting and analyzing 
 - **Enhanced AI Interaction:**  
   Integrate embeddings and vector databases so that the AI can intelligently interact with and reference your financial data.
   
-- **API Integrations:**  
-  Enable API calls to pull in live data or to trigger additional analytical actions based on your data.
+- **Automate Data collection:**  
+  Automate datacollection from specified accounts 
   
 - **Expanded Data Sources:**  
   Support for more file formats and financial institutions.
@@ -38,33 +38,38 @@ Streamlit + Ollama is a local, privacy-focused tool for ingesting and analyzing 
 - Python 3.8 or higher  
 - [Streamlit](https://streamlit.io/)  
 - [Pandas](https://pandas.pydata.org/)
-- [Ollama](https://ollama.com/)  
-- SQLite (comes with Python)  
+- [Ollama](https://ollama.com/)
 - Other dependencies listed in `requirements.txt` (e.g., `openpyxl` for XLSX support)
 
 
 ### Installation
 
 1. Clone this repository:
+```bash
   git clone git@github.com:gislibh/portfolio.git
   cd Streamlit + Ollama
-
+```
 
 2. (Optional) Create and activate a virtual environment:
+```bash
   python -m venv venv
   source venv/bin/activate  # on Linux/Mac
   venv\Scripts\activate  # on Windows
-
+```
 
 3. Install the required dependencies:
+```bash
   pip install -r requirements.txt
-
+```
 
 4. Install Ollama, use default port 11434
+```bash
   ollama pull gemma3:12b
+```
 
 ### Running the App
 
 Start the Streamlit application:
-
-streamlit run app.py
+```bash
+  streamlit run app.py
+```
