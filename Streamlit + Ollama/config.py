@@ -17,3 +17,7 @@ MONTHS_IS = {
     "maí": "05", "júní": "06", "júlí": "07", "ágúst": "08",
     "september": "09", "október": "10", "nóvember": "11", "desember": "12"
 }
+
+OLLAMA_API = "http://localhost:11434/api/generate"
+
+OLLAMA_MODEL = "gemma3:12b"

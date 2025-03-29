@@ -75,7 +75,7 @@ def main():
                     st.success(f"Imported transactions from {file.name}")
                 else:
                     st.warning(f"Unsupported file type: {file.type}. Please upload a PDF or XLSX.")
-            # Load transactions after file processing
+            
             load_transactions()
             st.subheader("Transactions Imported")
             st.dataframe(st.session_state.transactions)
@@ -84,7 +84,7 @@ def main():
         st.subheader("Add a Bill or Subscription Manually")
         with st.form("manual_bill_form"):
             creditor_input = st.text_input("Creditor")
-            date_input = st.date_input("Date")  # returns a datetime.date
+            date_input = st.date_input("Date")  
             amount_input = st.number_input("Amount (kr)", min_value=0, value=0)
             recurring_input = st.checkbox("Recurring?")
             submitted = st.form_submit_button("Add Bill")

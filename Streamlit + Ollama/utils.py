@@ -5,7 +5,7 @@ import requests
 import json
 from Bill import Bill
 
-from config import SYSTEM_PROMPT, MONTHS_IS
+from config import SYSTEM_PROMPT, MONTHS_IS, OLLAMA_API, OLLAMA_MODEL
 
 def extract_text_from_pdf(pdf_file):
     pdf_document = fitz.open(stream=pdf_file.read(), filetype="pdf")
@@ -87,7 +87,7 @@ def summarize_history(messages: list) -> str:
     return " | ".join(summary)
 
 def ask_ollama(messages: list) -> str:
-    url = "http://localhost:11434/api/generate"
+    url = OLLAMA_API
 
     MAX_TURNS = 12  # Max back-and-forths to keep verbatim
     short_history = messages[-MAX_TURNS:]
@@ -97,7 +97,7 @@ def ask_ollama(messages: list) -> str:
 
     payload = {
         "prompt": full_prompt,
-        "model": "gemma3:12b"
+        "model": OLLAMA_MODEL,
     }
 
     response = requests.post(url, json=payload)
