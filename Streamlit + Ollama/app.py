@@ -21,7 +21,10 @@ from analytics import (
     render_monthly_recurring_vs_onetime,
     render_yearly_total_spending,
     render_projected_recurring_bills,
-    render_last_year_step_function_chart
+    render_last_year_step_function_chart,
+    render_statement_spending_chart,
+    render_spending_by_creditor,
+    render_costs_by_category
 )
 
 
@@ -42,6 +45,11 @@ def main():
     st.title("Financial Analyzer")
     initialize_db()
     load_bills()
+    load_transactions()
+    
+    injected_prompt = create_financial_prompt_injection(
+        st.session_state.bills, st.session_state.transactions
+    )
 
     # Set color palette
     sns.set_palette("deep")
@@ -154,19 +162,28 @@ def main():
     # --- Tab 3: Analytics ---
     with tab3:
         st.header("Analytics")
-        if not st.session_state.bills:
+
+        if not st.session_state.bills and not st.session_state.transactions:
             st.write("No data to analyze.")
         else:
-            # Build a DataFrame from session state bills
-            df = build_bills_df(st.session_state.bills)
+            if st.session_state.bills:
+                # Build a DataFrame from bills
+                df = build_bills_df(st.session_state.bills)
+                
+                render_detailed_monthly_breakdown(df)
+                render_yearly_recurring_table(df)
+                render_monthly_total_spending(df)
+                render_monthly_recurring_vs_onetime(df)
+                render_yearly_total_spending(df)
+                render_projected_recurring_bills(st.session_state.bills)
+                render_last_year_step_function_chart(df)
             
-            render_detailed_monthly_breakdown(df)
-            render_yearly_recurring_table(df)
-            render_monthly_total_spending(df)
-            render_monthly_recurring_vs_onetime(df)
-            render_yearly_total_spending(df)
-            render_projected_recurring_bills(st.session_state.bills)
-            render_last_year_step_function_chart(df)
+            if st.session_state.transactions:
+                st.subheader("Bank Statement Analytics")
+                render_statement_spending_chart(st.session_state.transactions)
+                render_spending_by_creditor(st.session_state.transactions)
+                render_costs_by_category(st.session_state.transactions)
+
             
         # --- Tab 4: AI Assistant ---
     with tab4:
@@ -186,7 +203,7 @@ def main():
         if submit_button and user_input:
             st.session_state["ollama_history"].append({"role": "user", "content": user_input})
             with st.spinner("Thinking..."):
-                answer = ask_ollama(st.session_state["ollama_history"])
+                answer = ask_ollama(st.session_state["ollama_history"], injected_prompt)
             st.session_state["ollama_history"].append({"role": "assistant", "content": answer})
             st.session_state["clear_input"] = True
             st.rerun()

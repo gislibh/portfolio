@@ -1,15 +1,14 @@
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DB_NAME = "bills.db"
-DB_PATH = os.path.join(BASE_DIR, DB_NAME)
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bills.db")
 
 SYSTEM_PROMPT = (
     "You are a helpful and proactive financial assistant. "
     "You help the user understand, analyze, and project their personal spending based on uploaded bills. "
     "All amounts are in Icelandic króna (kr). "
-    "You do not give legal or tax advice. Be concise and clear."
+    "DATES ARE IN THE FORMAT YYYY-MM-DD. "
+    "Be concise and clear."
 )
 
 MONTHS_IS = {

@@ -3,6 +3,7 @@ import re
 import datetime
 import requests
 import json
+import streamlit as st
 from Bill import Bill
 
 from config import SYSTEM_PROMPT, MONTHS_IS, OLLAMA_API, OLLAMA_MODEL
@@ -58,13 +59,13 @@ def parse_date(date_str):
     return datetime.datetime.strptime(date_str, "%d.%m.%Y")
 
 
-def build_full_prompt(messages: list, system_prompt: str = None) -> str:
-    """
-    Build the full prompt for the LLM with a fixed system prompt (always included)
-    and an optional summary of older messages.
-    """
-    prompt_lines = [f"System: {SYSTEM_PROMPT}"]
-
+def build_full_prompt(messages: list, system_prompt: str = None, custom_system_prompt: str = None) -> str:
+    prompt_lines = []
+    if custom_system_prompt:
+        prompt_lines.append(f"System: {custom_system_prompt}")
+    else:
+        prompt_lines.append(f"System: {SYSTEM_PROMPT}")
+    
     if system_prompt:
         prompt_lines.append(f"(Summary of earlier conversation): {system_prompt}")
 
@@ -77,6 +78,7 @@ def build_full_prompt(messages: list, system_prompt: str = None) -> str:
     return "\n".join(prompt_lines)
 
 
+
 def summarize_history(messages: list) -> str:
     summary = []
     for msg in messages:
@@ -86,14 +88,19 @@ def summarize_history(messages: list) -> str:
             summary.append(f"Assistant replied briefly: {msg['content'][:100]}...")
     return " | ".join(summary)
 
-def ask_ollama(messages: list) -> str:
+def ask_ollama(messages: list, injected_prompt="") -> str:
     url = OLLAMA_API
 
     MAX_TURNS = 12  # Max back-and-forths to keep verbatim
     short_history = messages[-MAX_TURNS:]
     summary = summarize_history(messages[:-MAX_TURNS]) if len(messages) > MAX_TURNS else None
 
-    full_prompt = build_full_prompt(short_history, system_prompt=summary)
+    if injected_prompt:
+        combined_system = f"{SYSTEM_PROMPT}\n\n{injected_prompt}"
+    else:
+        combined_system = SYSTEM_PROMPT
+
+    full_prompt = build_full_prompt(short_history, system_prompt=summary, custom_system_prompt=combined_system)
 
     payload = {
         "prompt": full_prompt,
@@ -108,6 +115,37 @@ def ask_ollama(messages: list) -> str:
             continue
         parsed = json.loads(line)
         final_text.append(parsed.get("response", ""))
-
+        
     return "".join(final_text)
+
+def create_financial_prompt_injection(bills, transactions):
+    """
+    Creates a prompt injection that includes a summary of bills and transactions.
+    
+    Parameters:
+        bills (list): A list of Bill objects.
+        transactions (list): A list of transaction dictionaries (e.g. from Transaction.to_dict()).
+    
+    Returns:
+        str: A string to be injected into the LLM prompt.
+    """
+    prompt_lines = ["Financial Data Summary:"]
+    
+    if bills:
+        prompt_lines.append("Bills:")
+        for bill in bills:
+            prompt_lines.append(f"- {bill.creditor}: {int(bill.amount)} kr on {bill.date}")
+    else:
+        prompt_lines.append("No bills available.")
+    
+    if transactions:
+        prompt_lines.append("\nTransactions:")
+        for t in transactions:
+            prompt_lines.append(f"- {t['creditor']}: {int(t['amount'])} kr on {t['trans_date']}")
+    else:
+        prompt_lines.append("No transactions available.")
+    
+    return "\n".join(prompt_lines)
+
+
 

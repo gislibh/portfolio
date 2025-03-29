@@ -3,6 +3,7 @@ import streamlit as st
 import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import seaborn as sns
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
@@ -189,3 +190,108 @@ def render_last_year_step_function_chart(df):
     plt.tight_layout()
     st.pyplot(plt.gcf())
     st.caption("Each creditor uses its earliest known bill cost for prior months, updating with new bills.")
+
+
+def render_statement_spending_chart(transactions):
+    if not transactions:
+        st.info("No transaction data available.")
+        return
+
+    df = pd.DataFrame(transactions)
+
+    df['trans_date'] = pd.to_datetime(df['trans_date'])
+    df['month'] = df['trans_date'].dt.to_period('M').dt.to_timestamp()
+    monthly_totals = df.groupby('month', as_index=False)['amount'].sum()
+
+    st.subheader("Monthly Total Spending (Bank Statement)")
+    plt.figure(figsize=(10, 6))
+    sns.barplot(data=monthly_totals, x='month', y='amount', color='skyblue')
+    plt.title("Monthly Total Spending")
+    plt.xlabel("Month")
+    plt.ylabel("Amount")
+    plt.xticks(rotation=45)
+
+    st.pyplot(plt.gcf())
+    
+def render_spending_by_creditor(transactions):
+    if not transactions:
+        st.info("No transaction data available.")
+        return
+    
+    df = pd.DataFrame(transactions)
+    df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
+    
+    creditor_totals = df.groupby('creditor', as_index=False)['amount'].sum()
+    
+    st.subheader("Total Spending by Creditor")
+    
+    plt.figure(figsize=(10, 6))
+    ax = sns.barplot(
+        data=creditor_totals, 
+        x='creditor', 
+        y='amount', 
+        hue='creditor', 
+        palette='viridis', 
+        dodge=False
+    )
+    legend = ax.get_legend()
+    if legend is not None:
+        legend.remove()
+
+    
+    plt.title("Spending Grouped by Creditor")
+    plt.xlabel("Creditor")
+    plt.ylabel("Total Amount")
+    plt.xticks(rotation=45, ha='right')
+    
+    ax.yaxis.set_major_formatter(mtick.StrMethodFormatter('{x:,.0f}'))
+    for container in ax.containers:
+        ax.bar_label(container, fmt=lambda x: format(x, ',.0f').replace(',', '.'))
+    
+    st.pyplot(plt.gcf())
+
+    
+    
+def render_costs_by_category(transactions):
+    if not transactions:
+        st.info("No transaction data available.")
+        return
+    
+    df = pd.DataFrame(transactions)
+    df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
+    
+    cost_df = df[df['amount'] < 0].copy()
+    if cost_df.empty:
+        st.info("No cost data available (all amounts are positive).")
+        return
+    
+    # Group by category and sum costs (taking absolute values)
+    cost_by_category = cost_df.groupby('category', as_index=False)['amount'].sum()
+    cost_by_category['total_cost'] = cost_by_category['amount'].abs()
+    
+    st.subheader("Costs Grouped by Category")
+    
+    plt.figure(figsize=(10, 6))
+    # Use hue='category' so that palette can be mapped correctly, then remove the legend.
+    ax = sns.barplot(
+        data=cost_by_category, 
+        x='category', 
+        y='total_cost', 
+        hue='category', 
+        palette='magma', 
+        dodge=False
+    )
+    legend = ax.get_legend()
+    if legend is not None:
+        legend.remove()
+
+    plt.title("Total Costs by Category")
+    plt.xlabel("Category")
+    plt.ylabel("Cost (absolute value)")
+    plt.xticks(rotation=45, ha='right')
+    
+    ax.yaxis.set_major_formatter(mtick.StrMethodFormatter('{x:,.0f}'))
+    for container in ax.containers:
+        ax.bar_label(container, fmt=lambda x: format(x, ',.0f').replace(',', '.'))
+    
+    st.pyplot(plt.gcf())

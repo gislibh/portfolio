@@ -27,7 +27,7 @@ def initialize_db():
     CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         trans_date TEXT NOT NULL,
-        text TEXT,
+        creditor TEXT,
         amount REAL NOT NULL,
         balance REAL,
         category TEXT,
@@ -49,7 +49,7 @@ def get_transactions():
     for row in rows:
         transaction = Transaction(
             trans_date=row[1],
-            text=row[2],
+            creditor=row[2],
             amount=row[3],
             balance=row[4],
             category=row[5]
@@ -74,19 +74,19 @@ def import_statement_xlsx(filepath):
         trans_date = row.get("Dags")
         if pd.notnull(trans_date) and isinstance(trans_date, pd.Timestamp):
             trans_date = trans_date.strftime("%Y-%m-%d")
-        text       = row.get("Texti")
+        creditor       = row.get("Texti")
         amount     = row.get("Upphæð", 0)
         balance    = row.get("Staða")
         category   = row.get("Textalykill")
         
-        transaction = Transaction(trans_date, text, amount, balance, category)
+        transaction = Transaction(trans_date, creditor, amount, balance, category)
         
         cursor.execute("""
-            INSERT OR IGNORE INTO transactions (trans_date, text, amount, balance, category, trans_hash)
+            INSERT OR IGNORE INTO transactions (trans_date, creditor, amount, balance, category, trans_hash)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
             transaction.trans_date,
-            transaction.text,
+            transaction.creditor,
             transaction.amount,
             transaction.balance,
             transaction.category,
