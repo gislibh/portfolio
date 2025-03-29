@@ -38,7 +38,7 @@ Streamlit + Ollama is a local, privacy-focused tool for ingesting and analyzing 
 - Python 3.8 or higher  
 - [Streamlit](https://streamlit.io/)  
 - [Pandas](https://pandas.pydata.org/)
-- [Ollama] (https://ollama.com/)  
+- [Ollama](https://ollama.com/)  
 - SQLite (comes with Python)  
 - Other dependencies listed in `requirements.txt` (e.g., `openpyxl` for XLSX support)
 
