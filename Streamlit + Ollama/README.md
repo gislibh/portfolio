@@ -74,4 +74,4 @@ Start the Streamlit application:
   streamlit run app.py
 ```
 
-Please use the FAKE_DATA file for testing.
+Please use the TEST_DATA file for testing.
