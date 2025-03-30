@@ -73,3 +73,5 @@ Start the Streamlit application:
 ```bash
   streamlit run app.py
 ```
+
+Please use the FAKE_DATA file for testing.
