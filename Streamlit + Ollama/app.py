@@ -84,9 +84,13 @@ def main():
                 else:
                     st.warning(f"Unsupported file type: {file.type}. Please upload a PDF or XLSX.")
             
-            load_transactions()
+            transactions = get_transactions()
+            st.session_state.transactions = [t.to_dict() for t in transactions]
+
             st.subheader("Transactions Imported")
             st.dataframe(st.session_state.transactions)
+            
+           
 
 
         st.subheader("Add a Bill or Subscription Manually")
